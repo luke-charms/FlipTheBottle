@@ -11,6 +11,9 @@ class GameScene: SKScene {
     
     let table = TableTop()
     let bottle = Bottle()
+    let gauge = Gauge()
+    
+    let currentLevel = 1
 
     
     class func newGameScene() -> GameScene {
@@ -29,6 +32,9 @@ class GameScene: SKScene {
     func setUpScene() {
         addChild(table)
         addChild(bottle)
+        addChild(gauge)
+        
+        gauge.isHidden = true
         
     }
     
@@ -55,6 +61,7 @@ extension GameScene {
     
     func finishFlip() {
         bottle.flipping = false
+        gauge.isHidden = true
     }
     
 
@@ -64,10 +71,13 @@ extension GameScene {
             if !bottle.flipping {
                 // Any commands to be executed while bottle is in air go here...
                 bottle.flipping = true
+                gauge.isHidden = false
+                
                 let path = UIBezierPath()
                 path.move(to: CGPoint(x: 0, y: 0))
                 path.addLine(to: CGPoint(x: 0, y: 300))
                 path.addLine(to: CGPoint(x: 0, y: 0))
+                
                 let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 500)
                 bottle.run(move, completion: finishFlip)
             }

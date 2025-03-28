@@ -43,6 +43,20 @@
 			);
 			target = 8E64C2AE2D96302400198F33 /* FlipTheBottle macOS */;
 		};
+		8E64C3112D9663D800198F33 /* Exceptions for "FlipTheBottle iOS" folder in "FlipTheBottle tvOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AccuracyGauge.swift,
+			);
+			target = 8E64C29E2D96302400198F33 /* FlipTheBottle tvOS */;
+		};
+		8E64C3122D9663D800198F33 /* Exceptions for "FlipTheBottle iOS" folder in "FlipTheBottle macOS" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				AccuracyGauge.swift,
+			);
+			target = 8E64C2AE2D96302400198F33 /* FlipTheBottle macOS */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -58,6 +72,10 @@
 		};
 		8E64C2902D96302400198F33 /* FlipTheBottle iOS */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8E64C3112D9663D800198F33 /* Exceptions for "FlipTheBottle iOS" folder in "FlipTheBottle tvOS" target */,
+				8E64C3122D9663D800198F33 /* Exceptions for "FlipTheBottle iOS" folder in "FlipTheBottle macOS" target */,
+			);
 			path = "FlipTheBottle iOS";
 			sourceTree = "<group>";
 		};

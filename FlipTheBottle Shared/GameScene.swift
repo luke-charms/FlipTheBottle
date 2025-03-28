@@ -35,6 +35,10 @@ class GameScene: SKScene {
     override func didMove(to view: SKView) {
         self.setUpScene()
     }
+    
+    
+    func touchDown(atPoint pos : CGPoint) {
+    }
 
     func makeSpinny(at pos: CGPoint, color: SKColor) {
         
@@ -48,12 +52,25 @@ class GameScene: SKScene {
 #if os(iOS) || os(tvOS)
 // Touch-based event handling
 extension GameScene {
+    
+    func finishFlip() {
+        bottle.flipping = false
+    }
+    
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
-        
-        for t in touches {
-            self.makeSpinny(at: t.location(in: self), color: SKColor.green)
+        for _ in touches {
+            // Check if bottle is not already in air
+            if !bottle.flipping {
+                // Any commands to be executed while bottle is in air go here...
+                bottle.flipping = true
+                let path = UIBezierPath()
+                path.move(to: CGPoint(x: 0, y: 0))
+                path.addLine(to: CGPoint(x: 0, y: 300))
+                path.addLine(to: CGPoint(x: 0, y: 0))
+                let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 500)
+                bottle.run(move, completion: finishFlip)
+            }
         }
     }
     

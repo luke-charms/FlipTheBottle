@@ -11,6 +11,8 @@ import SpriteKit
 
 class Bottle: SKSpriteNode {
     
+    var flipping = false
+    
     init() {
         let texture = SKTexture(imageNamed: "bottle")
         

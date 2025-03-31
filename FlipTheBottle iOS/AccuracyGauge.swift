@@ -12,7 +12,6 @@ import SpriteKit
 
 class Gauge: SKSpriteNode {
 
-        
     init() {
         let texture = SKTexture(imageNamed: "meter")
         
@@ -29,4 +28,24 @@ class Gauge: SKSpriteNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+}
+
+class GaugeFiller: SKSpriteNode {
+    
+    init() {
+        let texture = SKTexture(imageNamed: "meter_filler")
+        
+        super.init(texture: texture, color: .white, size: texture.size())
+        
+        name = "GaugeFiller"
+        position = CGPoint(x: 0, y: -500)
+        anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        setScale(0.035)
+        zPosition = 1
+    }
+    
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }

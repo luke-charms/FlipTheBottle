@@ -6,12 +6,19 @@
 //
 
 import SpriteKit
+import Darwin
 
 class GameScene: SKScene {
     
     let table = TableTop()
     let bottle = Bottle()
+    
     let gauge = Gauge()
+    let gaugeFiller = GaugeFiller()
+    
+    let bottleFlash = BottleFlash()
+    
+    let score = Score()
     
     let currentLevel = 1
 
@@ -30,11 +37,16 @@ class GameScene: SKScene {
     }
     
     func setUpScene() {
+        gauge.addChild(gaugeFiller)
+        
         addChild(table)
         addChild(bottle)
         addChild(gauge)
+        addChild(bottleFlash)
+        addChild(score)
         
         gauge.isHidden = true
+        bottleFlash.run(SKAction.fadeOut(withDuration: 0.1))
         
     }
     
@@ -52,6 +64,7 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        
     }
 }
 
@@ -64,6 +77,21 @@ extension GameScene {
         gauge.isHidden = true
     }
     
+    func fillGauge() {
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: 0, y: 0))
+        path.addLine(to: CGPoint(x: 0, y: 1000))
+        path.addLine(to: CGPoint(x: 0, y: 0))
+        
+        let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 1800)
+        gaugeFiller.run(move)
+    }
+    
+    func flashBottleFlash() {
+        let animateList = SKAction.sequence([SKAction.fadeIn(withDuration: 0.1), SKAction.wait(forDuration: 0.2), SKAction.fadeOut(withDuration: 0.1)])
+        bottleFlash.run(animateList)
+    }
+    
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for _ in touches {
@@ -73,13 +101,20 @@ extension GameScene {
                 bottle.flipping = true
                 gauge.isHidden = false
                 
+                fillGauge()
+                
                 let path = UIBezierPath()
                 path.move(to: CGPoint(x: 0, y: 0))
                 path.addLine(to: CGPoint(x: 0, y: 300))
                 path.addLine(to: CGPoint(x: 0, y: 0))
                 
+                //TODO: Bottle needs to fall DOWN faster (because of gravity)
                 let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 500)
                 bottle.run(move, completion: finishFlip)
+            } else {
+                if gaugeFiller.position.y > 250 {
+                    flashBottleFlash()
+                }
             }
         }
     }

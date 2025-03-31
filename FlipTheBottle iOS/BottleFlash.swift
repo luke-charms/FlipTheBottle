@@ -18,7 +18,7 @@ class BottleFlash: SKSpriteNode {
         super.init(texture: texture, color: .white, size: texture.size())
         
         name = "bottleFlash"
-        position = CGPoint(x: 0, y: 0)
+        position = CGPoint(x: 0, y: 250)
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
         setScale(10.0)
         zPosition = 3

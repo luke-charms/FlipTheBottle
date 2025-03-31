@@ -20,7 +20,8 @@ class GameScene: SKScene {
     
     let score = Score()
     
-    let currentLevel = 1
+    var currentLevel = 0
+    var gameEnded = false
 
     
     class func newGameScene() -> GameScene {
@@ -55,13 +56,6 @@ class GameScene: SKScene {
     }
     
     
-    func touchDown(atPoint pos : CGPoint) {
-    }
-
-    func makeSpinny(at pos: CGPoint, color: SKColor) {
-        
-    }
-    
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         
@@ -75,6 +69,9 @@ extension GameScene {
     func finishFlip() {
         bottle.flipping = false
         gauge.isHidden = true
+        if gameEnded {
+            gameOver()
+        }
     }
     
     func fillGauge() {
@@ -108,35 +105,49 @@ extension GameScene {
                 path.addLine(to: CGPoint(x: 0, y: 300))
                 path.addLine(to: CGPoint(x: 0, y: 0))
                 
+                
+                
                 //TODO: Bottle needs to fall DOWN faster (because of gravity)
                 let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 500)
                 bottle.run(move, completion: finishFlip)
             } else {
+                //Player click screen CORRECT during bottle flip
                 if gaugeFiller.position.y > 250 {
                     flashBottleFlash()
+                    currentLevel += 1
+                    score.updateLabel(currentLevel)
+                } else {
+                    //Player click screen WRONG during bottle flip
+                    gameEnded = true
                 }
             }
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches {
-            self.makeSpinny(at: t.location(in: self), color: SKColor.blue)
+        for _ in touches {
+            
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches {
-            self.makeSpinny(at: t.location(in: self), color: SKColor.red)
+        for _ in touches {
+            
         }
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches {
-            self.makeSpinny(at: t.location(in: self), color: SKColor.red)
+        for _ in touches {
+            
         }
     }
     
+    func gameOver() {
+        bottle.gameOver()
+        score.gameOver()
+        
+        
+    }
    
 }
 #endif

@@ -26,6 +26,11 @@ class Score: SKLabelNode {
         text = String(level)
     }
     
+    func gameOver() {
+        setScale(0.5)
+        text = "GAME OVER"
+    }
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

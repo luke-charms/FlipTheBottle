@@ -30,7 +30,7 @@ class Bottle: SKSpriteNode {
     }
     
     func gameOver() {
-        self.zRotation = .pi / 4
+        self.zRotation = .pi / 2
     }
 }
 

@@ -126,11 +126,18 @@ extension GameScene {
                     let path = UIBezierPath()
                     path.move(to: CGPoint(x: 0, y: 0))
                     path.addLine(to: CGPoint(x: 0, y: 300))
-                    path.addLine(to: CGPoint(x: 0, y: 0))
                     
-                    //TODO: Bottle needs to fall DOWN faster (because of gravity)
-                    let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 500 * bottleSpeed)
-                    bottle.run(move, completion: finishFlip)
+                    let downPath = UIBezierPath()
+                    downPath.move(to: CGPoint(x: 0, y: 0))
+                    downPath.addLine(to: CGPoint(x: 0,y: -300))
+                    
+                    
+                    let movement = SKAction.sequence([
+                        SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 500 * bottleSpeed),
+                        SKAction.follow(downPath.cgPath, asOffset: true, orientToPath: false, speed: 600 * bottleSpeed)])
+                    bottle.run(movement, completion: finishFlip)
+                    
+                    
                 } else {
                     //Player click screen CORRECT during bottle flip
                     if gaugeFiller.position.y > 250 {

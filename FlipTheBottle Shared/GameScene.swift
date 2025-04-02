@@ -17,11 +17,14 @@ class GameScene: SKScene {
     let gaugeFiller = GaugeFiller()
     
     let bottleFlash = BottleFlash()
+    let symbol = Symbol()
     
     let score = Score()
     
     var currentLevel = 0
+    var bottleSpeed = 1.0
     var gameEnded = false
+    var roundClick = false
 
     
     class func newGameScene() -> GameScene {
@@ -39,12 +42,13 @@ class GameScene: SKScene {
     
     func setUpScene() {
         gauge.addChild(gaugeFiller)
+        bottle.addChild(bottleFlash)
         
         addChild(table)
         addChild(bottle)
         addChild(gauge)
-        addChild(bottleFlash)
         addChild(score)
+        addChild(symbol)
         
         gauge.isHidden = true
         bottleFlash.run(SKAction.fadeOut(withDuration: 0.1))
@@ -68,6 +72,7 @@ extension GameScene {
     
     func finishFlip() {
         bottle.flipping = false
+        roundClick = false
         gauge.isHidden = true
         if gameEnded {
             gameOver()
@@ -80,7 +85,7 @@ extension GameScene {
         path.addLine(to: CGPoint(x: 0, y: 1000))
         path.addLine(to: CGPoint(x: 0, y: 0))
         
-        let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 1800)
+        let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 1800 * bottleSpeed)
         gaugeFiller.run(move)
     }
     
@@ -89,36 +94,59 @@ extension GameScene {
         bottleFlash.run(animateList)
     }
     
+    func updateBottleSpeed() {
+        switch currentLevel {
+        case 0...5:
+            bottleSpeed += 0.050
+        case 5...15:
+            bottleSpeed += 0.025
+        case 15...20:
+            bottleSpeed += 0.020
+        case 20...25:
+            bottleSpeed += 0.015
+        case 25...50:
+            bottleSpeed += 0.010
+        default:
+            bottleSpeed += 0.005
+        }
+    }
+    
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for _ in touches {
-            // Check if bottle is not already in air
-            if !bottle.flipping {
-                // Any commands to be executed while bottle is in air go here...
-                bottle.flipping = true
-                gauge.isHidden = false
-                
-                fillGauge()
-                
-                let path = UIBezierPath()
-                path.move(to: CGPoint(x: 0, y: 0))
-                path.addLine(to: CGPoint(x: 0, y: 300))
-                path.addLine(to: CGPoint(x: 0, y: 0))
-                
-                
-                
-                //TODO: Bottle needs to fall DOWN faster (because of gravity)
-                let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 500)
-                bottle.run(move, completion: finishFlip)
-            } else {
-                //Player click screen CORRECT during bottle flip
-                if gaugeFiller.position.y > 250 {
-                    flashBottleFlash()
-                    currentLevel += 1
-                    score.updateLabel(currentLevel)
+            if !gameEnded {
+                // Check if bottle is not already in air
+                if !bottle.flipping {
+                    // Any commands to be executed while bottle is in air go here...
+                    bottle.flipping = true
+                    gauge.isHidden = false
+                    
+                    fillGauge()
+                    
+                    let path = UIBezierPath()
+                    path.move(to: CGPoint(x: 0, y: 0))
+                    path.addLine(to: CGPoint(x: 0, y: 300))
+                    path.addLine(to: CGPoint(x: 0, y: 0))
+                    
+                    //TODO: Bottle needs to fall DOWN faster (because of gravity)
+                    let move = SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 500 * bottleSpeed)
+                    bottle.run(move, completion: finishFlip)
                 } else {
-                    //Player click screen WRONG during bottle flip
-                    gameEnded = true
+                    //Player click screen CORRECT during bottle flip
+                    if gaugeFiller.position.y > 250 {
+                        flashBottleFlash()
+                        currentLevel += 1
+                        score.updateLabel(currentLevel)
+                        updateBottleSpeed()
+                        roundClick = true
+                    } else {
+                        if !roundClick {
+                            //Player click screen WRONG during bottle flip
+                            let shake = SKAction.shake(duration: 0.6)
+                            bottle.run(shake)
+                            gameEnded = true
+                        }
+                    }
                 }
             }
         }
@@ -174,3 +202,19 @@ extension GameScene {
 }
 #endif
 
+
+extension SKAction {
+    class func shake(duration:CGFloat, amplitudeX:Int = 20, amplitudeY:Int = 20) -> SKAction {
+        let numberOfShakes = duration / 0.015 / 2.0
+        var actionsArray:[SKAction] = []
+        for _ in 1...Int(numberOfShakes) {
+            let dx = CGFloat(arc4random_uniform(UInt32(amplitudeX))) - CGFloat(amplitudeX / 2)
+            let dy = CGFloat(arc4random_uniform(UInt32(amplitudeY))) - CGFloat(amplitudeY / 2)
+            let forward = SKAction.moveBy(x: dx, y:dy, duration: 0.015)
+            let reverse = forward.reversed()
+            actionsArray.append(forward)
+            actionsArray.append(reverse)
+        }
+        return SKAction.sequence(actionsArray)
+    }
+}

@@ -25,6 +25,13 @@ class GameScene: SKScene {
     var bottleSpeed = 1.0
     var gameEnded = false
     var roundClick = false
+    
+    var symbolActivate = false
+    
+    var flash = SKAction.sequence([
+        SKAction.fadeIn(withDuration: 0.1),
+        SKAction.wait(forDuration: 0.2),
+        SKAction.fadeOut(withDuration: 0.1)])
 
     
     class func newGameScene() -> GameScene {
@@ -50,8 +57,9 @@ class GameScene: SKScene {
         addChild(score)
         addChild(symbol)
         
-        gauge.isHidden = true
-        bottleFlash.run(SKAction.fadeOut(withDuration: 0.1))
+        gauge.run(SKAction.fadeOut(withDuration: 0.01))
+        symbol.run(SKAction.fadeOut(withDuration: 0.01))
+        bottleFlash.run(SKAction.fadeOut(withDuration: 0.01))
         
     }
     
@@ -71,9 +79,12 @@ class GameScene: SKScene {
 extension GameScene {
     
     func finishFlip() {
+        gauge.run(SKAction.fadeOut(withDuration: 0.05))
+
         bottle.flipping = false
         roundClick = false
-        gauge.isHidden = true
+        symbolActivate = false
+        
         if gameEnded {
             gameOver()
         }
@@ -89,10 +100,6 @@ extension GameScene {
         gaugeFiller.run(move)
     }
     
-    func flashBottleFlash() {
-        let animateList = SKAction.sequence([SKAction.fadeIn(withDuration: 0.1), SKAction.wait(forDuration: 0.2), SKAction.fadeOut(withDuration: 0.1)])
-        bottleFlash.run(animateList)
-    }
     
     func updateBottleSpeed() {
         switch currentLevel {
@@ -117,9 +124,9 @@ extension GameScene {
             if !gameEnded {
                 // Check if bottle is not already in air
                 if !bottle.flipping {
-                    // Any commands to be executed while bottle is in air go here...
+                    // Any commands to be executed while bottle is NOT in air go here...
                     bottle.flipping = true
-                    gauge.isHidden = false
+                    gauge.run(SKAction.fadeIn(withDuration: 0.05))
                     
                     fillGauge()
                     
@@ -139,9 +146,23 @@ extension GameScene {
                     
                     
                 } else {
+                    if symbolActivate {
+                        print("TESTING!")
+                        symbolActivate = false
+                    }
                     //Player click screen CORRECT during bottle flip
                     if gaugeFiller.position.y > 250 {
-                        flashBottleFlash()
+                        setFlash(timeValue: 0.2)
+                        bottleFlash.run(flash)
+                        
+                        setFlash(timeValue: 0.15)
+                        symbol.changeDirection()
+                        symbol.run(flash)
+                        
+                        //TODO: when symbol flashes, swipe in direction !
+                        symbolActivate = true
+                        
+                        
                         currentLevel += 1
                         score.updateLabel(currentLevel)
                         updateBottleSpeed()
@@ -177,11 +198,23 @@ extension GameScene {
         }
     }
     
+    @IBAction func swipeHandler(_ gestureRecognizer : UISwipeGestureRecognizer) {
+        if gestureRecognizer.state == .ended {
+            print("HELLO!")
+        }
+    }
+    
     func gameOver() {
         bottle.gameOver()
         score.gameOver()
-        
-        
+    }
+    
+    func setFlash(timeValue: Double) {
+        flash = SKAction.sequence([
+            SKAction.fadeIn(withDuration: timeValue),
+            SKAction.wait(forDuration: timeValue * 2),
+            SKAction.fadeOut(withDuration: timeValue)])
+
     }
    
 }

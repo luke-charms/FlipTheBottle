@@ -18,7 +18,7 @@ class Symbol: SKSpriteNode {
         name = "symbol"
         position = CGPoint(x: 0, y: 50)
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        setScale(2.0)
+        setScale(4.5)
         zPosition = 5
     }
     
@@ -27,18 +27,19 @@ class Symbol: SKSpriteNode {
     }
     
     
-    func changeDirection(newDirection: String) {
-        switch newDirection {
-        case "right":
+    func changeDirection() {
+        let randomInt = Int.random(in: 0..<4)
+        switch randomInt {
+        case 0:
             let texture = SKTexture(imageNamed: "right")
             self.texture = texture
-        case "left":
+        case 1:
             let texture = SKTexture(imageNamed: "left")
             self.texture = texture
-        case "up":
+        case 2:
             let texture = SKTexture(imageNamed: "up")
             self.texture = texture
-        case "down":
+        case 3:
             let texture = SKTexture(imageNamed: "down")
             self.texture = texture
         default:

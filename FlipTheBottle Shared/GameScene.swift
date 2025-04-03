@@ -49,7 +49,7 @@ class GameScene: SKScene {
     
     func setUpScene() {
         gauge.addChild(gaugeFiller)
-        bottle.addChild(bottleFlash)
+        //bottle.addChild(bottleFlash)
         
         addChild(table)
         addChild(bottle)
@@ -65,6 +65,13 @@ class GameScene: SKScene {
     
     override func didMove(to view: SKView) {
         self.setUpScene()
+        
+        let directions: [UISwipeGestureRecognizer.Direction] = [.up, .down, .left, .right]
+        for direction in directions {
+            let swipe = UISwipeGestureRecognizer(target: self, action: #selector(swipeHandler(_:)))
+            swipe.direction = direction
+            view.addGestureRecognizer(swipe)
+        }
     }
     
     
@@ -80,6 +87,7 @@ extension GameScene {
     
     func finishFlip() {
         gauge.run(SKAction.fadeOut(withDuration: 0.05))
+        self.run(SKAction.speed(to: 1.0, duration: 0.1))
 
         bottle.flipping = false
         roundClick = false
@@ -118,62 +126,68 @@ extension GameScene {
         }
     }
     
+    
+    func handleInitialFlip() {
+        bottle.flipping = true
+        gauge.run(SKAction.fadeIn(withDuration: 0.05))
+        
+        fillGauge()
+        
+        let path = UIBezierPath()
+        path.move(to: CGPoint(x: 0, y: 0))
+        path.addLine(to: CGPoint(x: 0, y: 300))
+        
+        let downPath = UIBezierPath()
+        downPath.move(to: CGPoint(x: 0, y: 0))
+        downPath.addLine(to: CGPoint(x: 0,y: -300))
+        
+        
+        let movement = SKAction.sequence([
+            SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 500 * bottleSpeed),
+            SKAction.follow(downPath.cgPath, asOffset: true, orientToPath: false, speed: 600 * bottleSpeed)])
+        bottle.run(movement, completion: finishFlip)
+    }
+    
+    
+    func handleSuccessfulClick() {
+            setFlash(timeValue: 0.2)
+            bottleFlash.run(flash)
+            
+            setFlash(timeValue: 0.15)
+            symbol.changeDirection()
+            symbol.run(flash)
+            
+            symbolActivate = true
+            self.speed = 0.2
+            
+            
+            //currentLevel += 1
+            //score.updateLabel(currentLevel)
+            //updateBottleSpeed()
+            //roundClick = true
+    }
+    
+    
+    func handleFailedClick() {
+        if !roundClick {
+            //Player click screen WRONG during bottle flip
+            let shake = SKAction.shake(duration: 0.6)
+            bottle.run(shake)
+            gameEnded = true
+        }
+    }
+    
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for _ in touches {
             if !gameEnded {
-                // Check if bottle is not already in air
                 if !bottle.flipping {
-                    // Any commands to be executed while bottle is NOT in air go here...
-                    bottle.flipping = true
-                    gauge.run(SKAction.fadeIn(withDuration: 0.05))
-                    
-                    fillGauge()
-                    
-                    let path = UIBezierPath()
-                    path.move(to: CGPoint(x: 0, y: 0))
-                    path.addLine(to: CGPoint(x: 0, y: 300))
-                    
-                    let downPath = UIBezierPath()
-                    downPath.move(to: CGPoint(x: 0, y: 0))
-                    downPath.addLine(to: CGPoint(x: 0,y: -300))
-                    
-                    
-                    let movement = SKAction.sequence([
-                        SKAction.follow(path.cgPath, asOffset: true, orientToPath: false, speed: 500 * bottleSpeed),
-                        SKAction.follow(downPath.cgPath, asOffset: true, orientToPath: false, speed: 600 * bottleSpeed)])
-                    bottle.run(movement, completion: finishFlip)
-                    
-                    
+                    handleInitialFlip()
                 } else {
-                    if symbolActivate {
-                        print("TESTING!")
-                        symbolActivate = false
-                    }
-                    //Player click screen CORRECT during bottle flip
                     if gaugeFiller.position.y > 250 {
-                        setFlash(timeValue: 0.2)
-                        bottleFlash.run(flash)
-                        
-                        setFlash(timeValue: 0.15)
-                        symbol.changeDirection()
-                        symbol.run(flash)
-                        
-                        //TODO: when symbol flashes, swipe in direction !
-                        symbolActivate = true
-                        
-                        
-                        currentLevel += 1
-                        score.updateLabel(currentLevel)
-                        updateBottleSpeed()
-                        roundClick = true
-                    } else {
-                        if !roundClick {
-                            //Player click screen WRONG during bottle flip
-                            let shake = SKAction.shake(duration: 0.6)
-                            bottle.run(shake)
-                            gameEnded = true
-                        }
+                        handleSuccessfulClick()
+                    } else if !symbolActivate {
+                        handleFailedClick()
                     }
                 }
             }
@@ -198,9 +212,40 @@ extension GameScene {
         }
     }
     
-    @IBAction func swipeHandler(_ gestureRecognizer : UISwipeGestureRecognizer) {
-        if gestureRecognizer.state == .ended {
-            print("HELLO!")
+    @objc func swipeHandler(_ gesture: UISwipeGestureRecognizer) {
+        if symbolActivate {
+            self.run(SKAction.speed(to: 1.0, duration: 0.5))
+            symbolActivate = false
+            switch gesture.direction {
+            case .up:
+                print("Swipe Up Detected")
+                handleSwipe(direction: "up")
+            case .down:
+                print("Swipe Down Detected")
+                handleSwipe(direction: "down")
+            case .left:
+                print("Swipe Left Detected")
+                handleSwipe(direction: "left")
+            case .right:
+                print("Swipe Right Detected")
+                handleSwipe(direction: "right")
+            default:
+                break
+            }
+        }
+    }
+    
+    func handleSwipe(direction: String) {
+        if symbol.currentDirection == direction {
+            print("Correct Swipe! 🎉")
+            // Reward the player
+            currentLevel += 1
+            score.updateLabel(currentLevel)
+            updateBottleSpeed()
+            roundClick = true
+        } else {
+            print("Wrong Swipe! ❌")
+            gameEnded = true
         }
     }
     

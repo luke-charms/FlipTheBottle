@@ -86,8 +86,12 @@ class GameScene: SKScene {
 extension GameScene {
     
     func finishFlip() {
+        //MIGHT NEED TO CHANGE THIS VALUE IF TOO CLOSE TO BOTTOM OF SWIPING
+        if self.speed < 0.4 {
+            gameEnded = true
+        }
         gauge.run(SKAction.fadeOut(withDuration: 0.05))
-        self.run(SKAction.speed(to: 1.0, duration: 0.1))
+        self.run(SKAction.speed(to: 1.0, duration: 0.05))
 
         bottle.flipping = false
         roundClick = false
@@ -153,7 +157,7 @@ extension GameScene {
             setFlash(timeValue: 0.2)
             bottleFlash.run(flash)
             
-            setFlash(timeValue: 0.15)
+            setFlash(timeValue: 0.15 * bottleSpeed)
             symbol.changeDirection()
             symbol.run(flash)
             
